@@ -28,17 +28,16 @@ Any other format is not supported. If the argument doesn't match these patterns,
 
 Before doing anything else, determine which code review skill is available. Check for skill files on disk rather than spawning agents — this is lightweight and avoids the cost of executing the skill just to test availability.
 
-Search for a `code-review` skill in the installed skills directories:
+Check the known skill installation locations in order:
 
-```
-Glob(pattern: "**/skills/code-review/SKILL.md")
-```
+1. **Project-local**: `Glob(pattern: ".opencode/skills/code-review/SKILL.md")`
+2. **Global config**: `Glob(path: "~/.config/opencode", pattern: "skills/code-review/SKILL.md")`
 
-If a match is found, set `review_skill` to `code-review` and proceed to Step 1c.
+If a match is found in either location, set `review_skill` to `code-review` and proceed to Step 1c. Stop searching after the first match.
 
 **Not available — stop:**
 
-If no code review skill was found, stop immediately and inform the user:
+If no code review skill was found in any location, stop immediately and inform the user:
 
 ```
 /self-review-loop requires a code review skill, but none was found.
