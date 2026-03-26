@@ -58,8 +58,10 @@ Confirm the PR is open. If merged or closed, inform the user and stop.
 
 ```
 gh pr checkout <N>
-git pull
+but pull --json --status-after
 ```
+
+If `but` is not available, fall back to `git pull`.
 
 ### 1e. Initialize the loop state
 
@@ -106,11 +108,13 @@ Parse the review output and check if the loop should stop:
 
 **Stop condition — only non-actionable feedback remains:**
 A review qualifies as "non-actionable" if ALL of the following are true:
+
 - The verdict is **APPROVE**
 - There are **zero** findings in the Critical or High tiers
 - All remaining findings are classified as `suggestion`, `nitpick`, `thought`, `risk`, or `question` (none of these require code changes — `risk` is an acknowledged trade-off and `question` is a request for clarification, not a code fix)
 
 **Stop condition — max turns reached:**
+
 - `turn` equals `max_turns` (5)
 
 If either stop condition is met, set `stop_reason` to `"clean_review"` or `"max_turns"` respectively and proceed to Step 3.
@@ -125,6 +129,7 @@ If no stop condition is met, continue to 2d.
 For each finding in the review output, decide whether to **address** or **skip** it.
 
 **Address** the finding if:
+
 - It is in the Critical or High tier
 - It identifies a real bug, logic error, or correctness issue
 - It requests reasonable error handling, validation, or edge case coverage
@@ -132,6 +137,7 @@ For each finding in the review output, decide whether to **address** or **skip**
 - It is a `blocker` or `risk` finding with a concrete harm scenario
 
 **Skip** the finding if:
+
 - It is a `nitpick` or `thought` with no impact on correctness
 - It is a subjective style preference with no codebase convention backing it
 - Addressing it would require architectural changes beyond the PR's scope
@@ -140,6 +146,7 @@ For each finding in the review output, decide whether to **address** or **skip**
 - It conflicts with feedback from a previous turn that was already applied
 
 For each finding, record:
+
 - **Action**: `addressed` or `skipped`
 - **Summary**: 1-2 sentence description of what you did or why you skipped
 - **Files changed**: list of files modified (if addressed)
@@ -169,6 +176,7 @@ After applying all changes for this turn, run the project's test suite and/or li
 - `.github/workflows/` CI config → inspect for the test command used in CI
 
 If a test runner is found, run it. If tests fail:
+
 1. Examine the failure and determine if it was caused by changes made in this turn
 2. If yes, fix the issue before proceeding — this counts as part of the same turn's changes
 3. If the failure is pre-existing (also fails on the PR's base branch), note it in the changelog but proceed
@@ -177,21 +185,29 @@ If no test runner is detected, skip this step and note "no test suite detected" 
 
 ### 2g. Commit and push
 
-If any files were changed:
+If any files were changed, commit and push. Use `but` (GitButler CLI) if available, otherwise fall back to `git`:
+
+**With GitButler (`but`):**
+
+```
+but status --json
+but commit <branch> -m "Address code review feedback (turn N)
+
+- <summary of change 1>
+- <summary of change 2>
+..." --changes <id1>,<id2> --json --status-after
+but push
+```
+
+**Without GitButler (fallback):**
 
 ```
 git add <file1> <file2> ...
-```
-
-```
 git commit -m "Address code review feedback (turn N)
 
 - <summary of change 1>
 - <summary of change 2>
 ..."
-```
-
-```
 git push
 ```
 
@@ -200,6 +216,7 @@ If no files were changed (all findings skipped or minor-only), skip the commit.
 ### 2h. Update the changelog
 
 Append this turn's results to the changelog and skipped lists. Record:
+
 - Turn number
 - Number of findings in each tier
 - What was addressed (with file references)
@@ -261,6 +278,7 @@ The core design principle: each review must be unbiased. If the reviewer knows w
 ### Conflict resolution across turns
 
 If a later turn's review gives feedback that contradicts a change made in an earlier turn:
+
 - Do NOT revert the earlier change automatically
 - Evaluate both positions and pick the one that is objectively better for the codebase
 - Record the conflict and your reasoning in the skipped list

@@ -45,8 +45,10 @@ gh pr checkout <N>
 Then pull to make sure you have the latest:
 
 ```
-git pull
+but pull --json --status-after
 ```
+
+If `but` is not available, fall back to `git pull`.
 
 ### 2c. Understand the PR's changes
 
@@ -149,6 +151,7 @@ Read the full comment, its discussion thread, the referenced file, and the surro
 ### 4b. Decide: Address or Skip
 
 **Address** the comment if:
+
 - It identifies a real bug, logic error, or correctness issue
 - It requests a reasonable code improvement (naming, structure, readability)
 - It asks for missing error handling, validation, or edge case coverage
@@ -157,6 +160,7 @@ Read the full comment, its discussion thread, the referenced file, and the surro
 - It is a question you can answer by improving the code or adding a clarifying comment
 
 **Skip** the comment if:
+
 - It is a subjective style preference with no clear codebase convention backing it
 - Addressing it would require a large architectural change beyond the PR's scope
 - The comment is based on a misunderstanding of the code (explain in your reply)
@@ -176,6 +180,7 @@ If addressing the comment:
 ### 4d. Record the action
 
 For each thread, record:
+
 - **Action**: `addressed` or `skipped`
 - **Summary**: 1-2 sentence description of what you did or why you skipped
 - **Files changed**: List of files modified (if addressed)
@@ -194,27 +199,31 @@ git status
 
 If no files were changed (all comments were skipped), skip to Step 6.
 
-### 5b. Stage and commit
+### 5b. Commit and push
 
-Stage only the files you modified:
+Commit the files you modified and push. Use `but` (GitButler CLI) if available, otherwise fall back to `git`:
+
+**With GitButler (`but`):**
+
+```
+but status --json
+but commit <branch> -m "Address PR review feedback
+
+- <summary of change 1>
+- <summary of change 2>
+..." --changes <id1>,<id2> --json --status-after
+but push
+```
+
+**Without GitButler (fallback):**
 
 ```
 git add <file1> <file2> ...
-```
-
-Write a clear commit message summarizing the feedback addressed:
-
-```
 git commit -m "Address PR review feedback
 
 - <summary of change 1>
 - <summary of change 2>
 ..."
-```
-
-### 5c. Push
-
-```
 git push
 ```
 
