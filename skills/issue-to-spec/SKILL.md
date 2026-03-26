@@ -8,6 +8,7 @@ description: "Orchestrates the full investigation-to-spec workflow starting from
 You are an orchestrator that takes a GitHub issue and produces a hardened spec ready for implementation. You drive the entire workflow yourself — no agent teams.
 
 Your workflow:
+
 1. Gather and explore the issue
 2. Interview the user to fill gaps
 3. Author and publish a spec
@@ -58,6 +59,7 @@ Using the issue as your guide, explore the relevant parts of the codebase:
 ### 1c. Synthesize understanding
 
 Build a clear mental model of:
+
 - **The problem**: What is broken, missing, or requested?
 - **The context**: What existing system does this touch? What constraints exist?
 - **The scope**: What is the likely boundary of changes needed?
@@ -111,19 +113,103 @@ Review the summary for completeness. If critical areas were not covered, ask tar
 
 ## Step 3: Author the Spec
 
-### 3a. Determine the spec filename
+### 3a. Determine the spec location
 
-Derive a descriptive, kebab-case filename from the issue title:
-- Strip issue number prefixes, special characters
-- Lowercase, replace spaces with hyphens
-- Keep it concise but descriptive (3-6 words)
-- Example: issue "Add retry logic to webhook delivery" -> `webhook-delivery-retries.md`
+First, detect whether the project uses [spec-kit](https://github.com/github/spec-kit) by checking if a `.specify/` directory exists in the repo root (use `Glob` for `.specify/`).
+
+**If spec-kit is detected:**
+
+- Determine the next feature number by scanning `specs/` for existing `NNN-*` directories
+- Derive a kebab-case feature name from the issue title (3-6 words)
+- Output path: `specs/<NNN>-<feature-name>/spec.md` (e.g., `specs/004-webhook-delivery-retries/spec.md`)
+- Use the spec-kit template format (see below)
+
+**If spec-kit is NOT detected:**
+
+- Derive a kebab-case filename from the issue title (3-6 words)
+- Output path: `docs/specs/<filename>.md` (e.g., `docs/specs/webhook-delivery-retries.md`)
+- Use the standard template format (see below)
 
 ### 3b. Write the spec
 
-Author a comprehensive spec at `docs/specs/<filename>.md` that synthesizes everything from the issue exploration and interview. The `Write` tool creates parent directories automatically, so `docs/specs/` will be created if it doesn't exist. The spec must be a standalone document — a reader who hasn't seen the issue or interview should understand the full picture.
+Author a comprehensive spec that synthesizes everything from the issue exploration and interview. The `Write` tool creates parent directories automatically. The spec must be a standalone document — a reader who hasn't seen the issue or interview should understand the full picture.
 
-#### Spec structure
+**Choose the template based on spec-kit detection:**
+
+#### Spec-kit template (when `.specify/` exists)
+
+If the project uses spec-kit, also check for a custom template at `.specify/templates/spec-template.md` or `.specify/templates/overrides/spec-template.md`. If found, use that template. Otherwise, use the standard spec-kit structure:
+
+```markdown
+# Feature Specification: <Title>
+
+**Feature Branch**: `<NNN>-<feature-name>`
+**Issue**: #<N>
+**Created**: <DATE>
+**Status**: Draft
+
+## User Scenarios & Testing
+
+### User Story 1 - <Brief Title> (Priority: P1)
+
+<Describe this user journey in plain language>
+
+**Why this priority**: <Explain the value>
+
+**Acceptance Scenarios**:
+
+1. **Given** <initial state>, **When** <action>, **Then** <expected outcome>
+2. **Given** <initial state>, **When** <action>, **Then** <expected outcome>
+
+### User Story 2 - <Brief Title> (Priority: P2)
+
+<Continue for each story, ordered by priority>
+
+### Edge Cases
+
+- What happens when <boundary condition>?
+- How does system handle <error scenario>?
+
+## Requirements
+
+### Functional Requirements
+
+- **FR-001**: System MUST <specific capability>
+- **FR-002**: System MUST <specific capability>
+
+### Key Entities (if feature involves data)
+
+- **<Entity>**: <What it represents, key attributes>
+
+## Design
+
+### Overview
+
+High-level description of the approach.
+
+### Detailed Design
+
+The technical design. Include subsections for different components or phases.
+
+### Alternatives Considered
+
+Other approaches that were evaluated and why they were rejected.
+
+## Success Criteria
+
+- **SC-001**: <Measurable metric>
+- **SC-002**: <Measurable metric>
+
+## Assumptions
+
+- <Assumption about scope, environment, or dependencies>
+
+## Open Questions
+
+Any remaining questions or decisions that need resolution.
+```
+
+#### Standard template (when `.specify/` does NOT exist)
 
 ```markdown
 # <Title>
@@ -254,6 +340,7 @@ After the review completes, analyze each finding and decide how to handle it:
 #### Agreement — incorporate the feedback
 
 For findings you agree with:
+
 - Update the spec to address the issue
 - Make the change directly — rewrite the section, add the missing detail, resolve the ambiguity
 - No annotation needed; the spec simply improves
@@ -261,6 +348,7 @@ For findings you agree with:
 #### Disagreement — add consideration notes
 
 For findings you disagree with or believe are not applicable:
+
 - Do NOT silently ignore them
 - Add a **Consideration Note** inline in the relevant spec section:
 
@@ -283,7 +371,7 @@ Consideration notes serve as a paper trail — they show the concern was seen an
 
 ### 6a. Write the hardened spec
 
-Update the spec file at `docs/specs/<filename>.md` with all changes from the review process (if applicable). Change the status from Draft to **Ready**:
+Update the spec file (at the path determined in Step 3a) with all changes from the review process (if applicable). Change the status from Draft to **Ready**:
 
 ```markdown
 **Status**: Ready
@@ -291,11 +379,12 @@ Update the spec file at `docs/specs/<filename>.md` with all changes from the rev
 
 ### 6b. Present the final output
 
-Present the final spec to the user with a summary of what changed:
+Present the final spec to the user with a summary of what changed. Use the actual spec path from Step 3a (either `specs/<NNN>-<name>/spec.md` for spec-kit or `docs/specs/<filename>.md` for standard).
 
 **For complex specs (went through review):**
+
 ```
-## Spec Complete: docs/specs/<filename>.md
+## Spec Complete: <spec-path>
 
 **Issue**: #<N>
 **Complexity**: Complex
@@ -305,15 +394,41 @@ Present the final spec to the user with a summary of what changed:
 - [List of findings that were incorporated]
 - [List of findings noted as considerations with brief reasoning]
 
-The hardened spec is ready at `docs/specs/<filename>.md`.
+The hardened spec is ready at `<spec-path>`.
 ```
 
 **For trivial specs (skipped review):**
+
 ```
-## Spec Complete: docs/specs/<filename>.md
+## Spec Complete: <spec-path>
 
 **Issue**: #<N>
 **Complexity**: Trivial (spec review skipped)
 
-The spec is ready at `docs/specs/<filename>.md`.
+The spec is ready at `<spec-path>`.
+```
+
+### 6c. Suggest next steps
+
+**If spec-kit is detected**, suggest the user continue with the spec-kit workflow:
+
+```
+### Next Steps (spec-kit)
+
+Your spec is ready for the next phases of the spec-kit workflow:
+1. `/speckit.clarify` — clarify any underspecified areas (optional)
+2. `/speckit.plan` — create a technical implementation plan
+3. `/speckit.tasks` — break down into actionable tasks
+4. `/speckit.implement` — execute the implementation
+```
+
+**If spec-kit is NOT detected**, suggest implementation options:
+
+```
+### Next Steps
+
+The spec is ready for implementation. You can:
+- Open a PR with the spec for team review
+- Start implementing directly from the spec
+- Run `/spec-review <spec-path>` for additional review (if the spec-review skill is installed)
 ```
