@@ -295,3 +295,40 @@ If a later turn's review gives feedback that contradicts a change made in an ear
 - One commit per turn (not per finding)
 - Commit messages reference the turn number for traceability
 - Each commit should be independently meaningful
+
+---
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|---|---|
+| "The first review was clean enough, let's stop" | Check the stop condition rigorously. "Clean enough" is not the same as "zero Critical/High findings with an APPROVE verdict." If the review returned REQUEST CHANGES, another turn is needed. |
+| "The reviewer is being too strict, I'll skip most findings" | A fresh reviewer has no context bias — if it flags something, evaluate it objectively. Skipping most findings across multiple turns means either the review skill is miscalibrated (unlikely) or you're avoiding real issues. |
+| "Tests pass, so the changes are safe" | Tests verify the changes don't break existing behavior. They don't verify the changes are correct, well-structured, or address the review findings properly. The next review turn will catch what tests can't. |
+| "Five turns is too many, I'll stop at 2" | The max is 5 turns, not the target. Most PRs converge in 2-3 turns. If you're at turn 4, something is wrong — but stopping early hides it. Let the stop conditions decide, not impatience. |
+| "I already know what the reviewer will say, I'll pre-apply the fixes" | The point of fresh agents is unbiased evaluation. Pre-applying imagined fixes introduces your bias and may miss real issues the fresh reviewer would catch. Let the review run, then respond. |
+| "This finding conflicts with a previous turn, so I'll skip it" | Conflicts between turns are signal. Evaluate both positions on their merits. If the later review is right, the earlier change was wrong — fix it. The oscillation detector handles genuine thrashing. |
+
+## Red Flags
+
+- Same findings appearing across multiple turns without being addressed
+- All findings skipped in every turn (the loop becomes a no-op)
+- Loop runs all 5 turns with no improvement in verdict or finding counts
+- Changes made without running the test suite (Step 2f skipped)
+- Files changing back and forth across turns without the oscillation detector triggering
+- Sub-agent spawned with context from previous turns (violates the fresh-agent principle)
+- Commit pushed with zero changes listed in the changelog
+- Test failures caused by review changes not fixed before the next turn
+
+## Verification
+
+After the loop completes:
+
+- [ ] The stop reason is documented and accurate (clean review, max turns, or oscillation)
+- [ ] Every turn has a commit or an explicit note that no changes were made
+- [ ] The changelog accounts for ALL changes across ALL turns
+- [ ] All skipped findings have documented reasons
+- [ ] Tests were run after each turn's changes (or "no test suite" was noted)
+- [ ] The final review output is included in the summary
+- [ ] No uncommitted changes remain on the branch
+- [ ] If oscillation was the stop reason, the thrashing files and conflicting feedback are documented

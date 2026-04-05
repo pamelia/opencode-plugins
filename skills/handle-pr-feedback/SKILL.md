@@ -325,3 +325,38 @@ If all comments were skipped (no commit), omit the Commit section and note that 
 - Read each file only once, even if multiple comments reference it
 - Batch all changes before committing — one commit for all addressed feedback
 - Process comments in file order to minimize context switching
+
+---
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|---|---|
+| "This comment is just a nitpick, I'll skip it without explaining" | Every skipped comment needs a reply explaining why. Silent skips leave reviewers wondering if their feedback was seen. The reply costs 10 seconds; the ambiguity costs a follow-up review cycle. |
+| "I understand the intent, I don't need to read the full thread" | Follow-up replies often contain clarifications, revised requests, or context that changes what the reviewer actually wants. Read the full thread before deciding. |
+| "The reviewer was wrong, so I'll skip it" | Even when the reviewer misunderstands, reply explaining the actual behavior. This clears up their misconception and prevents the same comment on the next PR. |
+| "I'll address the easy ones and skip the hard ones" | Skipping all hard feedback defeats the purpose. If a change is genuinely out of scope, explain why. If it's just hard, address it — that's the job. |
+| "I'll make multiple small commits, one per comment" | One commit for all changes. Multiple commits fragment the review response and make the diff harder to follow. Batch all changes, then commit once. |
+| "The comment conflicts with another reviewer's feedback" | Note the conflict explicitly in your reply and explain which direction you chose and why. Don't silently pick one and ignore the other. |
+
+## Red Flags
+
+- All comments skipped with "out of scope" reasoning
+- Changes made without reading the full discussion thread
+- Commit pushed without verifying the changes are coherent together
+- Reply tone is defensive or dismissive ("That's by design" without explanation)
+- Threads resolved without posting a reply first
+- Files modified outside the PR's scope without explicit reviewer request
+- No commit made despite multiple comments being "addressed" (did you actually edit the files?)
+- Comment inventory not presented to the user before processing begins
+
+## Verification
+
+After completing all steps:
+
+- [ ] Every unresolved thread has a reply (addressed or skipped with reason)
+- [ ] Every thread has been resolved via the GraphQL API
+- [ ] All code changes are in a single commit on the PR branch
+- [ ] The commit message lists what was addressed
+- [ ] The summary presented to the user accounts for every thread (addressed + skipped = total)
+- [ ] No threads were silently ignored
