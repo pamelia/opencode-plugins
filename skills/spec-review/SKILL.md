@@ -232,6 +232,28 @@ Binary. No "approved with suggestions" — either the spec is ready for implemen
 
 After delivering the review, use `team_delete` to disband the team. Agents persist learnings via their agent_memory — they do not need to stay alive for context retention.
 
+## Common Rationalizations
+
+| Rationalization | Reality |
+|---|---|
+| "This spec is straightforward, L0 is fine" | L0 skips self-critique and cross-review. If the spec introduces a new feature, API change, or touches multiple components, it's L1 at minimum. Don't under-classify to save time. |
+| "Cross-review will just slow things down" | Cross-review catches contradictions between specialists and prevents false confidence. It's the difference between "3 agents independently agreed" and "3 agents challenged each other and what survived is solid." |
+| "The spec is already approved by stakeholders, we shouldn't question it" | Stakeholder approval is about business intent, not technical completeness. A spec can be strategically correct and technically ambiguous. Review the technical quality, not the business decision. |
+| "The reviewers keep disagreeing, I'll just pick the safer verdict" | Disagreement is signal, not noise. Arbitrate based on evidence from the spec, not by defaulting to REVISIONS NEEDED. If findings are contradictory, that's Phase 2's job to resolve. |
+| "All agents returned suggestions only, so the spec is clearly fine" | Probably true, but verify the agents actually reviewed deeply. Check that findings reference specific sections and that the self-critique process ran. "No findings" from a reviewer that didn't read the spec is not approval. |
+| "I'll spawn all 8 agents to be thorough" | More agents = more noise. The dynamic selection criteria exist to match reviewers to the spec's content. Spawning an API reviewer for a spec with no API changes wastes tokens and dilutes signal. |
+
+## Red Flags
+
+- Lead reviews the spec itself instead of spawning agents
+- All agents return zero findings on an L2 spec
+- Phase 2 cross-review skipped on a spec with blocker or risk findings
+- Lead overrides agent findings without stating reasoning
+- Only clarity + completeness spawned for a security-sensitive or API-changing spec
+- Risk lane classified as L0 for a spec that introduces new services or data model changes
+- Review output doesn't reference specific sections of the spec
+- Verdict rendered before all agents have reported
+
 ## Calibration Principles
 
 1. **The spec is not the implementation.** Don't demand implementation-level detail in a design document. The spec should constrain, not dictate.

@@ -71,12 +71,12 @@ Gather the contents into a context block that will be passed to specialists.
 
 ### Specialist Descriptions
 
-| #   | Agent                     | Focus                                                                                                   |
-| --- | ------------------------- | ------------------------------------------------------------------------------------------------------- |
-| 1   | **completeness-reviewer** | Missing edge cases, error handling, validation, untested paths, incomplete migrations                   |
-| 2   | **complexity-reviewer**   | Code style, naming, duplication, unnecessary complexity, readability, codebase conventions              |
-| 3   | **feasibility-reviewer**  | Logic errors, race conditions, null/undefined risks, off-by-one errors, resource leaks, security issues |
-| 4   | **operations-reviewer**   | Backward compatibility, API contracts, performance implications, system design concerns                 |
+| #   | Agent                     | Focus                                                                                                            |
+| --- | ------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| 1   | **completeness-reviewer** | Missing edge cases, error handling, validation, untested paths, incomplete migrations                            |
+| 2   | **complexity-reviewer**   | Unnecessary complexity, over-engineering, premature abstractions, readability, codebase convention violations     |
+| 3   | **feasibility-reviewer**  | Architectural fit, technical correctness, hidden complexity, resource management, security risks                  |
+| 4   | **operations-reviewer**   | Production readiness, backward compatibility, performance implications, failure modes, observability gaps         |
 
 State which reviewers you're spawning and why before proceeding.
 
@@ -233,6 +233,28 @@ The verdict must be the LAST section.
 ## Step 6: Clean Up
 
 After delivering the review, use `team_delete` to disband the team.
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|---|---|
+| "This is a small change, we don't need multiple reviewers" | Small changes can introduce subtle bugs. The scope classification exists for a reason — trust it. Two reviewers catch things one misses. |
+| "The tests pass, so the code is correct" | Tests are necessary but not sufficient. They don't catch architecture problems, security issues, readability concerns, or missing edge cases the tests themselves don't cover. |
+| "I already know this code, I can review it myself" | You are the orchestrator, not a reviewer. Self-review has blind spots. Spawn the agents — that's the entire point of this skill. |
+| "The reviewers are too nitpicky, I'll consolidate everything as Low" | Don't downgrade findings to produce a cleaner report. If a reviewer flagged something as a blocker, preserve that severity. You arbitrate disagreements, not silence them. |
+| "The PR is too large to review properly, but we'll do our best" | Mention in the review output that the PR should be split. Large PRs hide bugs and make reviews superficial. Flag it, don't ignore it. |
+| "The reviewer failed, I'll just deliver the review with fewer specialists" | Acceptable for recovery, but note the gap. A missing correctness reviewer means correctness was not independently verified — say so in the output. |
+
+## Red Flags
+
+- Lead reviews the PR itself instead of spawning agents
+- All reviewers return zero findings on a non-trivial PR (>100 lines)
+- Lead systematically downgrades all findings to Low priority
+- Large PR reviewed without mentioning that it should be split
+- No file context provided to reviewers (they need full files, not just diff hunks)
+- Reviewers spawned sequentially instead of in a single parallel message
+- Verdict is APPROVE despite unresolved blocker findings
+- Review output omits the file:line references, making findings unactionable
 
 ## Calibration Principles
 

@@ -432,3 +432,43 @@ The spec is ready for implementation. You can:
 - Start implementing directly from the spec
 - Run `/spec-review <spec-path>` for additional review (if the spec-review skill is installed)
 ```
+
+---
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|---|---|
+| "The issue is detailed enough, I can skip the interview" | Issues describe problems, not solutions. The interview surfaces design decisions, edge cases, and scope boundaries that issue descriptions almost never contain. Skip the interview and the spec will have gaps. |
+| "I understand the codebase well enough, I don't need to explore it" | Explore anyway. You need to know current architecture, naming conventions, existing patterns, and related code paths to write a spec that fits the system. Assumptions about a codebase you haven't read lead to specs that propose designs at odds with reality. |
+| "The user confirmed my understanding, no need to probe deeper" | Confirmation is not completion. The user confirming your summary means you got the basics right. The interview is where you discover the edge cases, failure modes, and design trade-offs that neither the issue nor the summary captured. |
+| "This is just a bug fix, it doesn't need a full spec" | Small scope doesn't mean no spec — it means a short spec. Even bug fixes benefit from a Problem Statement, Context, Design, and Acceptance Criteria. Adapt the template; don't skip it. |
+| "The spec is short, so it's trivial — skip the review" | Length doesn't determine complexity. A short spec that changes a public API or data model is complex. Evaluate against the complexity criteria, not the word count. |
+| "I'll write the spec from the issue alone and check with the user at the end" | The interview exists to prevent a rewrite. Presenting a fully-written spec and asking "is this right?" produces polite confirmation, not critical feedback. Collaborate during writing, not after. |
+
+## Red Flags
+
+- Spec written without any codebase exploration (no Glob/Grep/Read calls in Step 1b)
+- Interview skipped or reduced to a single yes/no question
+- Spec doesn't reference any actual code paths, files, or existing APIs
+- Complexity assessment always comes out "trivial" (review the criteria honestly)
+- Open Questions section is empty for a spec with design decisions
+- Spec uses template sections as-is without adapting to the actual problem
+- Design section is vague ("we'll use the existing pattern") without specifying which pattern or how
+- No spec-kit detection attempted (Step 3a skipped)
+- User not shown the spec before complexity assessment
+
+## Verification
+
+Before delivering the final spec:
+
+- [ ] Codebase was explored and findings informed the spec (Step 1b)
+- [ ] User was interviewed and key decisions are captured (Step 2)
+- [ ] Spec covers Problem, Context, Design, and Acceptance Criteria at minimum
+- [ ] Spec references specific code paths, files, or APIs where relevant
+- [ ] Acceptance criteria are testable — you could write a test from each one
+- [ ] Open Questions section is honest (empty only if genuinely nothing is unresolved)
+- [ ] Complexity assessment matches the criteria, not gut feeling (Step 4)
+- [ ] If complex: spec review was run and feedback was incorporated or noted (Step 5)
+- [ ] Status field is set to "Ready" in the final version
+- [ ] Spec file exists at the correct path and was presented to the user
